@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        h1, h2 {
+            margin-bottom: 15px;
+        }
+
+        .form-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .form-group input.error {
+            border-color: red;
+        }
+
+        .error-msg {
+            color: red;
+            font-size: 0.85rem;
+            min-height: 16px;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 8px;
+        }
+
+        .contact-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contact-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .contact-info p {
+            margin: 2px 0;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .empty-state {
+            color: #888;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Contact Manager</h1>
+
+        <!-- Form -->
+        <div class="form-card">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Enter full name" />
+                <div class="error-msg" id="nameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter email address" />
+                <div class="error-msg" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="number" id="phone" placeholder="Enter phone number" />
+                <div class="error-msg" id="phoneError"></div>
+            </div>
+
+            <button class="btn btn-primary" id="addBtn">Add Contact</button>
+        </div>
+
+        <!-- Contact List -->
+        <div class="list-section">
+            <h2>Contacts</h2>
+            <ul class="contact-list" id="contactList"></ul>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
