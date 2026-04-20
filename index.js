@@ -1,55 +1,68 @@
 // ── DOM Elements ──
-const nameInput  = document.getElementById("name");
+const contactForm = document.getElementById("contactForm");
+const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
 const phoneInput = document.getElementById("phone");
 
-const nameError  = document.getElementById("nameError");
+const nameError = document.getElementById("nameError");
 const emailError = document.getElementById("emailError");
 const phoneError = document.getElementById("phoneError");
+const formStatus = document.getElementById("formStatus");
 
-const addBtn      = document.getElementById("addBtn");
+const addBtn = document.getElementById("addBtn");
 const contactList = document.getElementById("contactList");
 
 // ── State ──
-let contacts     = loadContacts();   // array of { id, name, email, phone }
-let editingId    = null;             // id of the contact currently being edited
+let contacts = [];
+let editingId = null;
 
 // ── Initial Render ──
-renderContacts();
+loadContacts();
 
 // ── Event Listener ──
-addBtn.addEventListener("click", handleAddOrUpdate);
+contactForm.addEventListener("submit", handleAddOrUpdate);
 
 // ── Core Functions ──
 
-function handleAddOrUpdate() {
-    const name  = nameInput.value.trim();
+async function handleAddOrUpdate(event) {
+    event.preventDefault();
+
+    const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     const phone = phoneInput.value.trim();
 
     if (!validate(name, email, phone)) return;
 
-    if (editingId !== null) {
-        // Update existing contact
-        const index = contacts.findIndex(c => c.id === editingId);
-        if (index !== -1) {
-            contacts[index] = { id: editingId, name, email, phone };
+    setFormStatus("Saving contact...");
+    addBtn.disabled = true;
+
+    try {
+        const payload = { name, email, phone };
+        const isEditing = editingId !== null;
+        const response = await fetch(isEditing ? `/api/contacts/${editingId}` : "/api/contacts", {
+            method: isEditing ? "PUT" : "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const responseBody = response.status === 204 ? null : await response.json();
+
+        if (!response.ok) {
+            throw new Error(responseBody?.message || "Unable to save contact.");
         }
+
         editingId = null;
         addBtn.textContent = "Add Contact";
-    } else {
-        // Add new contact
-        contacts.push({
-            id: Date.now(),
-            name,
-            email,
-            phone
-        });
+        clearForm();
+        setFormStatus("Contact saved successfully.", false);
+        await loadContacts();
+    } catch (error) {
+        setFormStatus(error.message, true);
+    } finally {
+        addBtn.disabled = false;
     }
-
-    saveContacts();
-    renderContacts();
-    clearForm();
 }
 
 // ── Validation ──
@@ -90,6 +103,11 @@ function showError(input, errorEl, message) {
     errorEl.textContent = message;
 }
 
+function setFormStatus(message, isError = false) {
+    formStatus.textContent = message;
+    formStatus.style.color = isError ? "red" : "#1f7a1f";
+}
+
 function clearErrors() {
     [nameInput, emailInput, phoneInput].forEach(i => i.classList.remove("error"));
     [nameError, emailError, phoneError].forEach(e => e.textContent = "");
@@ -115,8 +133,8 @@ function renderContacts() {
                 <p><strong>Phone:</strong> ${escapeHTML(contact.phone)}</p>
             </div>
             <div class="contact-actions">
-                <button class="btn btn-edit" onclick="editContact(${contact.id})">Edit</button>
-                <button class="btn btn-delete" onclick="deleteContact(${contact.id})">Delete</button>
+                <button class="btn btn-edit" onclick="editContact('${contact.id}')">Edit</button>
+                <button class="btn btn-delete" onclick="deleteContact('${contact.id}')">Delete</button>
             </div>
         `;
         contactList.appendChild(li);
@@ -136,6 +154,7 @@ function editContact(id) {
     editingId = id;
     addBtn.textContent = "Update Contact";
     clearErrors();
+    setFormStatus(`Editing ${contact.name}.`);
 
     // Scroll to form
     nameInput.focus();
@@ -144,18 +163,29 @@ function editContact(id) {
 
 // ── Delete ──
 
-function deleteContact(id) {
-    contacts = contacts.filter(c => c.id !== id);
+async function deleteContact(id) {
+    try {
+        const response = await fetch(`/api/contacts/${id}`, {
+            method: "DELETE"
+        });
 
-    // If the deleted contact was being edited, reset the form
-    if (editingId === id) {
-        editingId = null;
-        addBtn.textContent = "Add Contact";
-        clearForm();
+        if (!response.ok && response.status !== 204) {
+            const responseBody = await response.json().catch(() => null);
+            setFormStatus(responseBody?.message || "Unable to delete contact.", true);
+            return;
+        }
+
+        if (editingId === id) {
+            editingId = null;
+            addBtn.textContent = "Add Contact";
+            clearForm();
+        }
+
+        setFormStatus("Contact deleted.", false);
+        await loadContacts();
+    } catch (error) {
+        setFormStatus("Unable to delete contact. Check that the server is running.", true);
     }
-
-    saveContacts();
-    renderContacts();
 }
 
 // ── Helpers ──
@@ -165,6 +195,7 @@ function clearForm() {
     emailInput.value = "";
     phoneInput.value = "";
     clearErrors();
+    formStatus.textContent = "";
 }
 
 function escapeHTML(str) {
@@ -173,16 +204,20 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
-// ── Local Storage ──
-
-function saveContacts() {
-    localStorage.setItem("contacts", JSON.stringify(contacts));
-}
-
-function loadContacts() {
+async function loadContacts() {
     try {
-        return JSON.parse(localStorage.getItem("contacts")) || [];
-    } catch {
-        return [];
+        const response = await fetch("/api/contacts");
+
+        if (!response.ok) {
+            throw new Error("Failed to load contacts.");
+        }
+
+        contacts = await response.json();
+        renderContacts();
+        clearErrors();
+    } catch (error) {
+        contacts = [];
+        renderContacts();
+        setFormStatus(error.message || "Unable to load contacts.", true);
     }
 }

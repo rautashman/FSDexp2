@@ -94,7 +94,7 @@
         <h1>Contact Manager</h1>
 
         <!-- Form -->
-        <div class="form-card">
+        <form class="form-card" id="contactForm">
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" id="name" placeholder="Enter full name" />
@@ -109,12 +109,13 @@
 
             <div class="form-group">
                 <label for="phone">Phone Number</label>
-                <input type="number" id="phone" placeholder="Enter phone number" />
+                <input type="tel" id="phone" placeholder="Enter phone number" />
                 <div class="error-msg" id="phoneError"></div>
             </div>
 
-            <button class="btn btn-primary" id="addBtn">Add Contact</button>
-        </div>
+            <div class="error-msg" id="formStatus"></div>
+            <button class="btn btn-primary" id="addBtn" type="submit">Add Contact</button>
+        </form>
 
         <!-- Contact List -->
         <div class="list-section">

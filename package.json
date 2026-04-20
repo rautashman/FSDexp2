@@ -1,0 +1,14 @@
+{
+  "name": "contact-manager-mongodb",
+  "version": "1.0.0",
+  "description": "Contact manager with an Express backend and MongoDB storage.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongodb": "^6.18.0"
+  }
+}
