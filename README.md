@@ -22,20 +22,21 @@ This project is a simple contact manager that stores data in MongoDB through a N
    npm install
    ```
 
-2. Start MongoDB locally, or set the connection string:
+2. Create your local environment file from the example:
 
    ```bash
-   export MONGODB_URI="mongodb://127.0.0.1:27017"
-   export MONGODB_DB="contact_manager"
+   cp .env.example .env
    ```
 
-3. Start the app:
+3. Update `MONGODB_URI` in `.env` with your MongoDB Atlas connection string.
+
+4. Start the app:
 
    ```bash
    npm start
    ```
 
-4. Open the app in your browser:
+5. Open the app in your browser:
 
    ```
    http://localhost:3000
